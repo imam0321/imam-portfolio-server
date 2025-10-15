@@ -14,4 +14,57 @@ model User {
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // relations
+  projects    Project[]
+  experiences Experience[]
+
+  @@map("users")
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  images      String[]
+  features    String[]
+  tags        String[]
+  category    String
+  liveLink    String?
+  clientRepo  String?
+  serverRepo  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // relation
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("projects")
+}
+
+model Experience {
+  id              String    @id @default(uuid())
+  title           String
+  companyName     String
+  startDate       DateTime
+  endDate         DateTime?
+  jobType         JobType
+  technologies    String[]
+  tags            String[]
+  keyAchievements String[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // relation
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("experiences")
+}
+
+enum JobType {
+  Remote
+  FullTime
+  Hybrid
 }
