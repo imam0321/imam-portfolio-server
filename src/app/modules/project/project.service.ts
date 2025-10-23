@@ -53,6 +53,18 @@ const getAllProjects = async () => {
   return result
 }
 
+const getSingleProject = async (projectId: string) => {
+  return await prisma.project.findFirst({
+    where: {
+      id: projectId
+    }
+  })
+}
+
+const updateProject = async (userId: string, projectId: string) => {
+  
+}
+
 const deleteProject = async (userId: string, projectId: string) => {
   const isUserExist = await prisma.user.findUnique({
     where: {
@@ -70,5 +82,6 @@ const deleteProject = async (userId: string, projectId: string) => {
 export const ProjectService = {
   createProject,
   getAllProjects,
+  getSingleProject,
   deleteProject
 }

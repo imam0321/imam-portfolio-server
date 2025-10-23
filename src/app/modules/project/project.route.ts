@@ -13,6 +13,7 @@ router.post("/", checkAuth(),
     req.body = ProjectValidation.createProjectValidation.parse(JSON.parse(req.body.data))
     ProjectController.createProject(req, res, next)
   })
+router.get("/:id", ProjectController.getSingleProject)
 router.delete("/:id", checkAuth(), ProjectController.deleteProject)
 
 
