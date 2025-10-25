@@ -37,6 +37,19 @@ const getSingleProject = catchAsync(async (req: Request, res: Response, next: Ne
     data: result
   })
 })
+
+const updateProject = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const user = req.user as JwtPayload;
+  const result = await ProjectService.updateProject(user.userId, req.params.id, req);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Project updated successfully",
+    data: result
+  })
+})
+
 const deleteProject = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const user = req.user as JwtPayload;
   const result = await ProjectService.deleteProject(user.userId, req.params.id);
@@ -53,5 +66,6 @@ export const ProjectController = {
   createProject,
   getAllProjects,
   getSingleProject,
+  updateProject,
   deleteProject
 }

@@ -54,8 +54,38 @@ const getSingleProject = async (projectId: string) => {
   })
 }
 
-const updateProject = async (userId: string, projectId: string) => {
+const updateProject = async (userId: string, projectId: string, req: Request): Promise<Project> => {
+  await ensureUserExists(userId);
 
+  const project = await prisma.project.findUnique({ where: { id: projectId } });
+  if (!project) {
+    throw new AppError(httpStatus.NOT_FOUND, "Project not found");
+  }
+
+  const payload = req.body;
+
+  let updatedImages = project.images || [];
+  if (payload.deleteImages && payload.deleteImages.length > 0) {
+    await Promise.all(payload.deleteImages.map((url: string) => fileUploader.deleteImageFroCloudinary(url)));
+    updatedImages = updatedImages.filter(url => !payload.deleteImages?.includes(url));
+  }
+
+  const files = req.files as Express.Multer.File[];
+  if (files && files.length > 0) {
+    const uploadResults = await Promise.all(files.map(file => fileUploader.uploadToCloudinary(file)));
+    const newImages = uploadResults.map(result => result.secure_url);
+    updatedImages = [...updatedImages, ...newImages];
+  }
+
+  const updatedProject = await prisma.project.update({
+    where: { id: projectId },
+    data: {
+      ...payload,
+      images: updatedImages
+    }
+  });
+
+  return updatedProject;
 }
 
 const deleteProject = async (userId: string, projectId: string) => {
@@ -82,5 +112,6 @@ export const ProjectService = {
   createProject,
   getAllProjects,
   getSingleProject,
+  updateProject,
   deleteProject
 }

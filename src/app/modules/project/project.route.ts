@@ -6,14 +6,21 @@ import { ProjectValidation } from "./project.validation";
 
 const router = Router();
 
-router.get("/", ProjectController.getAllProjects)
+router.get("/", ProjectController.getAllProjects);
+
 router.post("/", checkAuth(),
   fileUploader.upload.array("files"),
   (req: Request, res: Response, next: NextFunction) => {
     req.body = ProjectValidation.createProjectValidation.parse(JSON.parse(req.body.data))
     ProjectController.createProject(req, res, next)
-  })
+  });
+
 router.get("/:id", ProjectController.getSingleProject)
+
+router.patch("/:id", checkAuth(),
+  fileUploader.upload.array("files"),
+  ProjectController.updateProject)
+
 router.delete("/:id", checkAuth(), ProjectController.deleteProject)
 
 
