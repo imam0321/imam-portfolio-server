@@ -4,17 +4,10 @@ import AppError from "../../errorHelpers/AppError"
 import httpStatus from "http-status-codes"
 import { Request } from "express"
 import { fileUploader } from "../../helpers/fileUploader"
+import { ensureUserExists } from "../../helpers/dbHelpers"
 
 const createProject = async (userId: string, req: Request): Promise<Project> => {
-  const isUserExist = await prisma.user.findUnique({
-    where: {
-      id: userId
-    }
-  })
-
-  if (!isUserExist) {
-    throw new AppError(httpStatus.BAD_REQUEST, "User not found")
-  }
+  await ensureUserExists(userId)
 
   let uploadedImages: string[] = [];
   const files = req.files as Express.Multer.File[];
@@ -62,21 +55,27 @@ const getSingleProject = async (projectId: string) => {
 }
 
 const updateProject = async (userId: string, projectId: string) => {
-  
+
 }
 
 const deleteProject = async (userId: string, projectId: string) => {
-  const isUserExist = await prisma.user.findUnique({
-    where: {
-      id: userId
-    }
-  })
+  await ensureUserExists(userId)
 
-  if (!isUserExist) {
-    throw new AppError(httpStatus.BAD_REQUEST, "User not found")
+  const project = await prisma.project.findUnique({ where: { id: projectId } })
+
+  if (!project) {
+    throw new AppError(httpStatus.NOT_FOUND, "Project not found");
   }
 
-  return await prisma.project.delete({ where: { id: projectId } })
+  if (project.images && project.images.length > 0) {
+    await Promise.all(
+      project.images.map((url) => fileUploader.deleteImageFroCloudinary(url))
+    );
+  }
+
+  await prisma.project.delete({ where: { id: projectId } });
+
+  return { message: "Project deleted successfully" };
 }
 
 export const ProjectService = {

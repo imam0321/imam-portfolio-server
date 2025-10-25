@@ -42,8 +42,24 @@ const uploadToCloudinary = async (file: Express.Multer.File) => {
   }
 };
 
+export const deleteImageFroCloudinary = async (url: string) => {
+  try {
+    const regex = /\/v\d+\/(.*?)\.(jpg|jpeg|png|gif|webp)$/i;
+
+    const match = url.match(regex);
+
+    if (match && match[1]) {
+      const public_id = match[1];
+      await cloudinary.uploader.destroy(public_id);
+    }
+  } catch (error: any) {
+    throw new AppError(401, "Cloudinary image deletion failed", error.message);
+  }
+};
+
 
 export const fileUploader = {
   upload,
   uploadToCloudinary,
+  deleteImageFroCloudinary
 }
