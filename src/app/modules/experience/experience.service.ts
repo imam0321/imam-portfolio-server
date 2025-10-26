@@ -16,7 +16,22 @@ const createExperience = async (userId: string, payload: Experience) => {
   return result;
 };
 
+const getAllExperiences = async () => {
+  const result = await prisma.experience.findMany()
+  return result
+}
+
+const getSingleExperience = async (experienceId: string) => {
+  return await prisma.experience.findFirst({
+    where: {
+      id: experienceId
+    }
+  })
+}
+
 
 export const ExperienceService = {
-  createExperience
+  createExperience,
+  getAllExperiences,
+  getSingleExperience,
 }
